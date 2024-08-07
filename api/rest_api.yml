@@ -1,0 +1,687 @@
+openapi: 3.1.0
+info:
+  title: TravelSocialNetwork API
+  description: Current API describes interaction with TravelSocialNetwork
+  version: 1.0.0
+
+tags:
+  - name: Posts
+  - name: Locations
+  - name: Subscriptions
+
+paths:
+  /posts:
+    post:
+      tags:
+        - Posts
+      summary: Create post
+      description: Method creates post
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  examples: [Это самое лучшее место на Земле]
+                location_id:
+                  type: integer
+                  format: int64
+                  examples: [1]
+                photos:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PhotoFile'
+              required:
+                  - description
+                  - location_id
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    examples: [94d4196a-173b-4694-94cc-b6cb0b40e3b2]
+                required:
+                  - id
+                
+        400:
+          description: Bad Request
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /posts/{post_id}:
+    get:
+      tags:
+        - Posts
+      summary: Get post
+      description: Method retunn a post
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostWithComments'
+                
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - Posts
+      summary: Delete post
+      description: Method deletes a post
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No Content
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Server error
+
+
+  /posts/{post_id}/ratings:
+    post:
+      tags:
+        - Posts
+      summary: Add rating
+      description: Method adds rating to post
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  format: int32
+                  examples: [1]
+                  enum:
+                    - 1
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+              required:
+                  - rating
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+
+
+
+  /posts/{post_id}/comments:
+    post:
+      tags:
+        - Posts
+      summary: Add comment
+      description: Method adds comment to post
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  examples: [Текст комментария к посту]
+              required:
+                  - text
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+    get:
+      tags:
+        - Posts
+      summary: Get comments
+      description: Method returns a list of comments sorted by date
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    format: int32
+                    examples: [145665]
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Server error
+
+  /locations:
+    post:
+      tags:
+        - Locations
+      summary: Create location
+      description: Method creates location
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  examples: [Эйфелева башня]
+                description:
+                  type: string
+                  examples: [С Эйфелевой башни открываются потрясающие панорамы Парижа. Забронируйте билет заранее, чтобы подняться по ступенькам — а еще лучше на лифте — на три платформы. Вы узнаете об историческом и архитектурном прошлом памятника. Сфотографируйтесь на вершине мерцающей башни ночью или забронируйте столик в местном ресторане.]
+                coordinates:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                      examples: [-33.8599358]
+                    lng:
+                      type: number
+                      examples: [151.2090295]
+              required:
+                  - name
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    examples: [1]
+                required:
+                  - id
+                
+        400:
+          description: Bad Request
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+    get:
+      tags:
+        - Locations
+      summary: Get locations
+      description: Method returns a sorted list of locations
+      parameters:
+        - name: sort_key
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: rating
+            enum:
+              - rating
+              - alphabet
+        - name: sort_order
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: desk
+            enum:
+              - ask
+              - desk
+        - name: limit
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    format: int32
+                    examples: [145665]
+                  locations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Location'
+                
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+
+  /locations/{location_id}/posts:
+    get:
+      tags:
+        - Locations
+      summary: Get posts for location
+      description: Method list of posts by location_id
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: limit
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    format: int32
+                    examples: [145665]
+                  pots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /subscriptions/posts:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get posts
+      description: Method returns a sorted list of post
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    format: int32
+                    examples: [145665]
+                  pots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+
+  /subscriptions/{user_id}:
+    post:
+      tags:
+        - Subscriptions
+      summary: Create subscription
+      description: Method creates subscription to user
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+    delete:
+      tags:
+        - Subscriptions
+      summary: Delete subscription
+      description: Method deletes subscription to user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Server error
+
+components:
+  schemas:
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          examples: [1]
+        name:
+          type: string
+          examples: [Эйфелева башня]
+        description:
+          type: string
+          examples: [С Эйфелевой башни открываются потрясающие панорамы Парижа. Забронируйте билет заранее, чтобы подняться по ступенькам — а еще лучше на лифте — на три платформы. Вы узнаете об историческом и архитектурном прошлом памятника. Сфотографируйтесь на вершине мерцающей башни ночью или забронируйте столик в местном ресторане.]
+        coordinates:
+          type: object
+          properties:
+            lat:
+              type: number
+              examples: [-33.8599358]
+            lng:
+              type: number
+              examples: [151.2090295]
+      required:
+        - id
+        - name
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [c041a23d-b8df-488b-b92f-94a56ebd9879]
+        description:
+          type: string
+          examples: [Это самое лучшее место на Земле]
+        date:
+          type: string
+          examples: [2023-10-26T07:00:01.000+03:00]
+        author:
+          $ref: '#/components/schemas/Author'
+        location:
+          $ref: '#/components/schemas/Location'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoLink'
+        rating:
+          type: number
+          examples: [4.5]
+      required:
+        - id
+        - description
+        - date
+        - author
+        - location
+        - photos
+        - rating
+
+    PostWithComments:
+      type: object
+      properties:
+        description:
+          type: string
+          examples: [Это самое лучшее место на Земле]
+        date:
+          type: string
+          examples: [2023-10-26T07:00:01.000+03:00]
+        author:
+          $ref: '#/components/schemas/Author'
+        location:
+          $ref: '#/components/schemas/Location'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoLink'
+        rating:
+          type: number
+          examples: [4.5]
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        more_comments:
+          type: boolean
+          examples: [true]
+      required:
+        - description
+        - date
+        - author
+        - location
+        - photos
+        - rating
+        - comments
+        - more_comments
+
+    PhotoLink:
+      type: object
+      properties:
+        caption:
+          type: string
+          examples: [Мы подъезжаем]
+        url:
+          type: string
+          examples: [https://www.travel-social-network/f54de441-7f87-4fa8-8481-754953e3bc4d]
+      required:
+        - caption
+        - url
+
+    PhotoFile:
+      type: object
+      properties:
+        caption:
+          type: string
+          examples: [Мы подъезжаем]
+        file:
+          type: string
+          contentMediaType: image/png
+          contentEncoding: base64
+      required:
+        - caption
+        - file
+
+
+    Comment:
+      type: object
+      properties:
+        text:
+          type: string
+          examples: [Отличный отзыв]
+        date:
+          type: string
+          examples: [2023-10-26T07:00:01.000+03:00]
+        author:
+          $ref: '#/components/schemas/Author'
+      required:
+        - text
+        - date
+        - author
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          examples: [c041a23d-b8df-488b-b92f-94a56ebd9879]
+        name:
+          type: string
+          examples: [IvanovIvan]
+      required:
+        - id
+        - name
