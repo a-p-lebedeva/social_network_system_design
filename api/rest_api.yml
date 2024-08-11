@@ -69,7 +69,7 @@ paths:
       tags:
         - Posts
       summary: Get post
-      description: Method retunn a post
+      description: Method returns a post
       parameters:
         - name: post_id
           in: path
