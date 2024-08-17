@@ -5,11 +5,97 @@ info:
   version: 1.0.0
 
 tags:
+  - name: Photos
   - name: Posts
   - name: Locations
   - name: Subscriptions
 
+
 paths:
+  /photos:
+    post:
+      tags:
+        - Photos
+      summary: Upload photo
+      description: Method creates link to photo
+      parameters:
+        - name: Idempotence-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  contentMediaType: image/png
+                  contentEncoding: base64
+              required:
+                  - file
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_url:
+                    type: string
+                    examples: [https://www.travel-social-network/f54de441-7f87-4fa8-8481-754953e3bc4d]
+                  preiew_url:
+                    type: string
+                    examples: [https://www.travel-social-network/f54de441-7f87-4fa8-8481-754953e3bc4d]
+                required:
+                  - file_url
+                  - preiew_url
+                
+        400:
+          description: Bad Request
+        409:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /photos/{url}:
+    get:
+      tags:
+        - Photos
+      summary: Get photo
+      description: Method returns a file
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  file:
+                    type: string
+                    contentMediaType: image/png
+                    contentEncoding: base64
+                required:
+                  - file
+                
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Server error
+
   /posts:
     post:
       tags:
@@ -33,13 +119,13 @@ paths:
                   type: string
                   examples: [Это самое лучшее место на Земле]
                 location_id:
-                  type: integer
-                  format: int64
-                  examples: [1]
+                  type: string
+                  format: uuid
+                  examples: [c041a23d-b8df-488b-b92f-94a56ebd9879]
                 photos:
                   type: array
                   items:
-                    $ref: '#/components/schemas/PhotoFile'
+                    $ref: '#/components/schemas/Photo'
               required:
                   - description
                   - location_id
@@ -60,6 +146,65 @@ paths:
         400:
           description: Bad Request
         409:
+          description: Bad Request
+        500:
+          description: Server error
+
+    get:
+      tags:
+        - Posts
+      summary: Get posts
+      description: Method returns a sorted list of post
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            default: subscriptions
+            enum:
+              - subscriptions
+              - locations
+        - name: location_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 0
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    format: int32
+                    examples: [145665]
+                  pots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                
+        400:
           description: Bad Request
         500:
           description: Server error
@@ -304,9 +449,9 @@ paths:
                 type: object
                 properties:
                   id:
-                    type: integer
-                    format: int64
-                    examples: [1]
+                    type: string
+                    format: uuid
+                    examples: [c041a23d-b8df-488b-b92f-94a56ebd9879]
                 required:
                   - id
                 
@@ -380,104 +525,6 @@ paths:
         500:
           description: Server error
 
-
-  /locations/{location_id}/posts:
-    get:
-      tags:
-        - Locations
-      summary: Get posts for location
-      description: Method list of posts by location_id
-      parameters:
-        - name: location_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: limit
-          in: query
-          required: false
-          explode: true
-          schema:
-            type: integer
-            format: int32
-            default: 20
-        - name: offset
-          in: query
-          required: false
-          explode: true
-          schema:
-            type: integer
-            format: int32
-            default: 0
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                    format: int32
-                    examples: [145665]
-                  pots:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Post'
-                
-        400:
-          description: Bad Request
-        500:
-          description: Server error
-
-  /subscriptions/posts:
-    get:
-      tags:
-        - Subscriptions
-      summary: Get posts
-      description: Method returns a sorted list of post
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          explode: true
-          schema:
-            type: integer
-            format: int32
-            default: 20
-        - name: offset
-          in: query
-          required: false
-          explode: true
-          schema:
-            type: integer
-            format: int32
-            default: 0
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                    format: int32
-                    examples: [145665]
-                  pots:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Post'
-                
-        400:
-          description: Bad Request
-        500:
-          description: Server error
-
-
   /subscriptions/{user_id}:
     post:
       tags:
@@ -536,9 +583,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-          examples: [1]
+          type: string
+          format: uuid
+          examples: [c041a23d-b8df-488b-b92f-94a56ebd9879]
         name:
           type: string
           examples: [Эйфелева башня]
@@ -578,7 +625,7 @@ components:
         photos:
           type: array
           items:
-            $ref: '#/components/schemas/PhotoLink'
+            $ref: '#/components/schemas/Photo'
         rating:
           type: number
           examples: [4.5]
@@ -607,7 +654,7 @@ components:
         photos:
           type: array
           items:
-            $ref: '#/components/schemas/PhotoLink'
+            $ref: '#/components/schemas/Photo'
         rating:
           type: number
           examples: [4.5]
@@ -628,33 +675,22 @@ components:
         - comments
         - more_comments
 
-    PhotoLink:
+    Photo:
       type: object
       properties:
         caption:
           type: string
           examples: [Мы подъезжаем]
-        url:
+        file_url:
+          type: string
+          examples: [https://www.travel-social-network/f54de441-7f87-4fa8-8481-754953e3bc4d]
+        preiew_url:
           type: string
           examples: [https://www.travel-social-network/f54de441-7f87-4fa8-8481-754953e3bc4d]
       required:
         - caption
-        - url
-
-    PhotoFile:
-      type: object
-      properties:
-        caption:
-          type: string
-          examples: [Мы подъезжаем]
-        file:
-          type: string
-          contentMediaType: image/png
-          contentEncoding: base64
-      required:
-        - caption
-        - file
-
+        - file_url
+        - preiew_url
 
     Comment:
       type: object
