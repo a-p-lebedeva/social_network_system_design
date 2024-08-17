@@ -24,8 +24,8 @@ Table photos_outbox{
   status VARCHAR(10) [not null]
  }
 
-Table post_list_outbox{
+Table posts_outbox{
   id UUID [pk, not null]
-  post_id UUID [not null]
+  post JSON [not null]
   status VARCHAR(10) [not null]
  }
