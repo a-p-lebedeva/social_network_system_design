@@ -118,11 +118,11 @@ RPS (добавление локации):
 
 Просмотр списка комментариев: 
 
-    4 KB * 20 records * 2300 req/s ~= 184 MB/s
+    1 KB * 20 records * 2300 req/s ~= 46 MB/s
 
 Добавление комментария: 
  
-    4 KB * 350 req/s ~= 1400 KB/s
+    1 KB * 350 req/s ~= 350 KB/s
 
 Добавление оценки: 
 
@@ -164,10 +164,10 @@ RPS (добавление локации):
      
 Комментарии:
 
-     Data per year: 1400 KB/s * 86400 s * 365 = 41 TB
-     Trafic: 1400 KB/s + 184 MB/s = 186 MB/s
-     IOPS: 2300
-     Disks: 4 SSD (SATA) by 12 TB
+     Data per year: 350 KB/s * 86400 s * 365 = 11 TB
+     Trafic: 350 KB/s + 46 MB/s = 47 MB/s
+     IOPS: 2650
+     Disks: 4 SSD (SATA) by 4 TB
 
 Подписки:
 
