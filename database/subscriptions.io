@@ -12,3 +12,9 @@ Table celebrities_outbox {
   status VARCHAR(10) [not null]
  }
 
+Table subscriptions_outbox {
+  id UUID [pk, not null]
+  subscriber_id UUID [not null] 
+  target_id UUID [not null] 
+  status VARCHAR(10) [not null]
+ }
