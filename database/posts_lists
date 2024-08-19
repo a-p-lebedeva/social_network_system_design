@@ -1,0 +1,19 @@
+//Tarantool
+
+Table subscribed_posts {
+  user_id UUID [pk, not null]
+  post_list jsonb [not null]
+ }
+
+ Table celebrities_post {
+  celebrity_id UUID [pk, not null]
+  post_list jsonb [not null]
+ }
+
+ Table location_posts {
+  location_id UUID [pk, not null]
+  post_list jsonb [not null]
+ }
+
+//+ множество celebrity_id
+//+ остортированный по post_count список популярных location_id 
