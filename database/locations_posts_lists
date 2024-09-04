@@ -1,0 +1,15 @@
+// Tarantool
+//
+// Replication:
+// - master-slave (async)
+// - replication factor 2
+//
+// Sharding:
+// - key based by location_id
+
+ Table location_posts {
+  location_id UUID [pk, not null]
+  post_list jsonb [not null]
+ }
+
+//+ остортированный по post_count список популярных location_id 
