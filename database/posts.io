@@ -1,4 +1,11 @@
-//PgSQL
+// PgSQL
+//
+// Replication:
+// - master-slave (async)
+// - replication factor 2
+//
+// Sharding:
+// - key based by post_id
 
 Table posts {
   id UUID [pk, not null]
@@ -20,6 +27,7 @@ Ref : photos.post_id > posts.id
 
 Table photos_outbox{
   id UUID [pk, not null]
+  post_id UUID [not null]
   url VARCHAR(255) [not null]
   status VARCHAR(10) [not null]
  }
