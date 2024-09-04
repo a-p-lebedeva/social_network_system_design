@@ -1,4 +1,11 @@
-//PgSQL
+// PgSQL
+//
+// Replication:
+// - master-slave (async)
+// - replication factor 2
+//
+// Sharding:
+// - key based by comment_id
 
 Table comments {
   id UUID [pk, not null]
