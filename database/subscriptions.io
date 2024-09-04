@@ -1,4 +1,11 @@
-//PgSQL
+// PgSQL
+//
+// Replication:
+// - master-slave (async)
+// - replication factor 2
+//
+// Sharding:
+// - key based by target_id (celebrity_id)
 
 Table subscriptions {
   subscriber_id UUID [not null] 
